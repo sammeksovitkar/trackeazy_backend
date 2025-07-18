@@ -7,8 +7,8 @@ const cors = require('cors');
 app.use(cors()); // This will enable CORS for all routes
 app.use(express.json()); // Enable JSON parsing
 
-// const spreadsheetId = '1oZNkR9FEK649wfJRvRD6_oq4I4R-r8hCQrmuoPoF1vA'; // just the ID
-const spreadsheetId = process.env.SPREADSHEET_ID; // just the ID
+ const spreadsheetId = '1oZNkR9FEK649wfJRvRD6_oq4I4R-r8hCQrmuoPoF1vA'; // just the ID
+// const spreadsheetId = process.env.SPREADSHEET_ID; // just the ID
 
 const sheetName = 'Sheet1';
 

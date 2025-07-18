@@ -3,7 +3,8 @@ const keys = require('./lofty-scheduler-466207-c9-34f044923fff.json');
 const express = require('express');
 const app = express();
 const port = 3000;
-
+const cors = require('cors');
+app.use(cors()); // This will enable CORS for all routes
 app.use(express.json()); // Enable JSON parsing
 
 const spreadsheetId = '1EnSzNTAtdz0CBU8R6KTtc6Rop5a8xw-nPhZdpKxRnm8'; // just the ID

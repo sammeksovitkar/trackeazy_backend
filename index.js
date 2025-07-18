@@ -6,22 +6,36 @@ const port = 3000;
 const cors = require('cors');
 app.use(cors()); // This will enable CORS for all routes
 app.use(express.json()); // Enable JSON parsing
-const env = require('dotenv').config(); // this loads .env into process.env
 
+require('dotenv').config();
 
 // const spreadsheetId = '1oZNkR9FEK649wfJRvRD6_oq4I4R-r8hCQrmuoPoF1vA'; // just the ID
-const spreadsheetId = '1oZNkR9FEK649wfJRvRD6_oq4I4R-r8hCQrmuoPoF1vA'; // just the ID
+const spreadsheetId = process.env.SPREADSHEET_ID
 const sheetName = 'Sheet1';
+
+// async function getSheetsClient() {
+//   const auth = new google.auth.GoogleAuth({
+//     credentials: keys,
+//     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+//   });
+
+//   const client = await auth.getClient();
+//   return google.sheets({ version: 'v4', auth: client });
+// }
 
 async function getSheetsClient() {
   const auth = new google.auth.GoogleAuth({
-    credentials: keys,
+    credentials: {
+      client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    },
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
 
   const client = await auth.getClient();
   return google.sheets({ version: 'v4', auth: client });
 }
+
 
 // 👇 Write headers ONLY if sheet is empty
 async function writeHeadersIfEmpty() {

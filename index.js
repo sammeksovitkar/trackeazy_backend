@@ -1,5 +1,4 @@
 const { google } = require('googleapis');
-const keys = require('./api-project-466310-e9374957f2c1.json');
 const express = require('express');
 const app = express();
 const port = 3000;
@@ -9,19 +8,10 @@ app.use(express.json()); // Enable JSON parsing
 
 require('dotenv').config();
 
-// const spreadsheetId = '1oZNkR9FEK649wfJRvRD6_oq4I4R-r8hCQrmuoPoF1vA'; // just the ID
 const spreadsheetId = process.env.SPREADSHEET_ID
 const sheetName = 'Sheet1';
 
-// async function getSheetsClient() {
-//   const auth = new google.auth.GoogleAuth({
-//     credentials: keys,
-//     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-//   });
 
-//   const client = await auth.getClient();
-//   return google.sheets({ version: 'v4', auth: client });
-// }
 
 async function getSheetsClient() {
   const auth = new google.auth.GoogleAuth({

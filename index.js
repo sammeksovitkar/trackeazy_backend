@@ -1,5 +1,5 @@
 const { google } = require('googleapis');
-const keys = require('./lofty-scheduler-466207-c9-34f044923fff.json');
+const keys = require('./api-project-466310-c9d21df03832.json');
 const express = require('express');
 const app = express();
 const port = 3000;
@@ -7,7 +7,9 @@ const cors = require('cors');
 app.use(cors()); // This will enable CORS for all routes
 app.use(express.json()); // Enable JSON parsing
 
-const spreadsheetId = '1EnSzNTAtdz0CBU8R6KTtc6Rop5a8xw-nPhZdpKxRnm8'; // just the ID
+// const spreadsheetId = '1oZNkR9FEK649wfJRvRD6_oq4I4R-r8hCQrmuoPoF1vA'; // just the ID
+const spreadsheetId = process.env.SPREADSHEET_ID; // just the ID
+
 const sheetName = 'Sheet1';
 
 async function getSheetsClient() {
@@ -97,6 +99,6 @@ app.get('/get-sheet-data', async (req, res) => {
 });
 
 // Start the server
-//app.listen(port, () => {
-//  console.log(`🚀 Server running at http://localhost:${port}`);
-//});
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
+});

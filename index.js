@@ -1,103 +1,61 @@
- const { google } = require('googleapis');
-const express = require('express')
-const app = express();
-const port = 3000;
+const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
-app.use(cors()); // This will enable CORS for all routes
-app.use(express.json()); // Enable JSON parsing
-
 require('dotenv').config();
 
-const spreadsheetId = process.env.SPREADSHEET_ID
-const sheetName = 'Sheet1';
+const app = express();
+const port = process.env.PORT || 3000;
 
+app.use(cors());
+app.use(express.json());
 
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
-async function getSheetsClient() {
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    },
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => console.log('✅ Connected to MongoDB'));
 
-  const client = await auth.getClient();
-  return google.sheets({ version: 'v4', auth: client });
-}
+// Define Schema
+const locationSchema = new mongoose.Schema({
+  latlong: {lat:String,long:String},
+  time: String,
+}, { timestamps: true });
 
+// Define Model
+const Location = mongoose.model('Location', locationSchema);
 
-// 👇 Write headers ONLY if sheet is empty
-async function writeHeadersIfEmpty() {
-  const sheets = await getSheetsClient();
-
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${sheetName}!A1:C1`,
-  });
-
-  const headers = response.data.values;
-  if (!headers || headers.length === 0) {
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: `${sheetName}!A1:C1`,
-      valueInputOption: 'USER_ENTERED',
-      resource: {
-        values: [['latlong', 'time',]],
-      },
-    });
-    console.log('✅ Headers written to sheet.');
-  } else {
-    console.log('ℹ️ Headers already exist.');
-  }
-}
-
-// 👇 Append a new row of data under headers
-async function appendToSheet(dataArray) {
-  const sheets = await getSheetsClient();
-
-  await sheets.spreadsheets.values.append({
-    spreadsheetId,
-    range: `${sheetName}!A2:C`, // start appending from row 2
-    valueInputOption: 'USER_ENTERED',
-    resource: {
-      values: [dataArray],
-    },
-  });
-
-  console.log('✅ Data appended to Google Sheet.');
-}
-
-// POST /data → to send data to the sheet
+// POST /data → to save data to MongoDB
 app.post('/data', async (req, res) => {
   const newData = req.body;
-  console.log(newData,"asdfasfd")
+  console.log(newData, '📦 Incoming data');
 
-  if (!newData.latlong || !newData.time ) {
+  if (!newData.latlong || !newData.time) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    await writeHeadersIfEmpty(); // Add headers if not already
-    await appendToSheet([newData.latlong, newData.time, ]);
+    const location = new Location({
+      latlong: {lat:newData.latlong.lat,long:newData.latlong.long},
+      time: newData.time,
+    });
 
-    res.status(201).json({ message: 'Data appended successfully' });
+    await location.save();
+    res.status(201).json({ message: '✅ Data saved to MongoDB' });
   } catch (error) {
-    console.error('Error appending data:', error);
+    console.error('❌ Error saving data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// GET /get-sheet-data → to read data from sheet
+// GET /get-sheet-data → to fetch all records
 app.get('/get-sheet-data', async (req, res) => {
   try {
-    const sheets = await getSheetsClient();
-    const result = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: `${sheetName}!A1:C`,
-    });
-
-    res.json(result.data.values || []);
+    const data = await Location.find().sort({ createdAt: -1 });
+    res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

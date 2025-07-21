@@ -6,7 +6,9 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // or: ['https://trackeazy-frontend-8i23.vercel.app']
+}));
 app.use(express.json());
 
 // MongoDB Connection

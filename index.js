@@ -59,7 +59,9 @@ app.post('/data', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
+app.get('/', (req, res) => {
+  res.send('🚀 TrackEazy Backend is running!');
+});
 // GET /get-sheet-data → to fetch all records
 app.get('/get-sheet-data', async (req, res) => {
   try {

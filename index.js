@@ -72,6 +72,17 @@ app.get('/get-sheet-data', async (req, res) => {
   }
 });
 
+app.delete('/clear-data', async (req, res) => {
+  try {
+    await Location.deleteMany({});
+    res.json({ message: '🧹 All data deleted successfully!' });
+  } catch (error) {
+    console.error('❌ Error deleting data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 // Start the server
 // app.listen(port, () => {
 //   console.log(`🚀 Server running at http://localhost:${port}`);
